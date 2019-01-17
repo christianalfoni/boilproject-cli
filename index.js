@@ -1,8 +1,8 @@
 #! /usr/bin/env node
 const { exec } = require('child_process');
-const configs = require('./configs')
 const fs = require('fs-extra')
 const isPlainObject = require('is-plain-obj')
+const path = require('path')
 const firebase = require('firebase')
 require("firebase/firestore");
 const configuration = process.argv[2]
@@ -25,7 +25,7 @@ function getFirebaseDb (config) {
 function deepMerge(source, target) {
   if (isPlainObject(source)) {
     return Object.keys(source).reduce((aggr, key) => Object.assign(aggr, {
-      [key]: deepMerge(source[key], target[key])
+      [key]: deepMerge(source[key], aggr[key])
     }), target || {})
   } else if (Array.isArray(source)) {
     return source.reduce((aggr, value) => aggr.concat(value), target || [])
@@ -35,6 +35,12 @@ function deepMerge(source, target) {
 }
 
 function writeFile (file) {
+  const outputPath = path.resolve(file.path)
+
+  if (!outputPath.startsWith(path.resolve())) {
+    throw new Error('You can not configure paths outside of the project folder!')
+  }
+  
   fs.outputFileSync(file.path, file.content)
 }
 
@@ -48,7 +54,7 @@ const db = getFirebaseDb({
   messagingSenderId: "186256588329"
 })
 
-console.log("Grabbing configuration...")
+console.log("Downloading boilerplate from boilproject.io...")
 db
   .collection("links")
   .where('username', '==', username)
@@ -63,33 +69,47 @@ db
 
     return db.collection('profiles')
       .doc(result.uid)
-      .collection('configurations')
+      .collection('boilerplates')
       .doc(result.name)
       .get()
       .then(result => result.data())
   })
   .then((data) => {
-    console.log("Installing packages...")
     
     return new Promise((resolve, reject) => {
-      exec('npm init --y && npm install ' + data.packages.join(' '), (error, stdout) => {
+      exec('npm init --y', (error, stdout) => {
         if (error) {
           reject(error)
           return;
         }
-        console.log(stdout);
+
+        console.log("Creating files...")
+        
         try {
+          const packageJsonFromData = data.files.shift()
           const packageJson = fs.readJSONSync('./package.json')
     
           data.files.forEach(writeFile)
         
-          fs.writeFileSync('./package.json', JSON.stringify(deepMerge(JSON.parse(data.packageJson || '{}'), packageJson), null, 2))
+          fs.writeFileSync('./package.json', JSON.stringify(deepMerge(JSON.parse(packageJsonFromData.content || '{}'), packageJson), null, 2))
     
-          console.log("Written config files!")
           resolve()
         } catch (e) {
           reject(e)
         }
+      });
+    })
+  })
+  .then(() => {
+    return new Promise((resolve, reject) => {
+      console.log("Installing packages...")
+      exec('npm install', (error, stdout) => {
+        if (error) {
+          reject(error)
+          return;
+        }
+        console.log(stdout)
+        resolve()
       });
     })
   })

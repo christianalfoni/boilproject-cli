@@ -1,13 +1,13 @@
 {
-  "name": "@christianalfoni/configure-project",
+  "name": "boilproject",
   "version": "1.0.0",
-  "description": "An NPX tool to configure a new project",
+  "description": "The CLI of boilproject.io",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "configure-project": "index.js"
+    "boilproject": "index.js"
   },
   "repository": {
     "type": "git",
