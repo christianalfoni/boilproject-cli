@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/christianalfoni/configure-project#readme",
   "dependencies": {
-    "firebase": "^5.7.3",
+    "firebase": "^5.8.4",
     "fs-extra": "^7.0.1",
     "is-plain-obj": "^1.1.0"
   }
