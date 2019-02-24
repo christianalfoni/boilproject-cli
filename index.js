@@ -13,13 +13,7 @@ const configurationName = configurationArray[1]
 function getFirebaseDb (config) {
   firebase.initializeApp(config);
 
-  const db = firebase.firestore();
-
-  db.settings({
-    timestampsInSnapshots: true
-  });
-
-  return db
+  return firebase.firestore();
 }
 
 function deepMerge(source, target) {
