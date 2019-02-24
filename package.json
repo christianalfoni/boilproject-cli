@@ -1,6 +1,6 @@
 {
   "name": "boilproject",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The CLI of boilproject.io",
   "main": "index.js",
   "scripts": {
